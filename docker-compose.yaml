@@ -4,6 +4,8 @@ services:
   app:
     build:
       context: .
+    depends_on:
+      - db
     volumes:
       # Comment out the next line in production
       - ./:/srv/app:rw
@@ -13,10 +15,25 @@ services:
       - /srv/app/var/logs/
       - /srv/app/var/sessions/
 
+  db:
+    build:
+      context: ./docker/db
+      dockerfile: ./Dockerfile
+    environment:
+      - MYSQL_DATABASE=afsy
+      # You should definitely change the password in production
+      - MYSQL_PASSWORD=afsy
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
+      - MYSQL_USER=afsy
+    volumes:
+      - db-data:/var/lib/mysql:rw
+      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./docker/db/data:/var/lib/mysql:rw
+
   nginx:
     build:
-      context: .
-      dockerfile: ./Dockerfile.nginx
+      context: ./docker/nginx
+      dockerfile: ./Dockerfile
     depends_on:
       - app
     volumes:
@@ -29,9 +46,12 @@ services:
   # This HTTP/2 proxy is not secure: it should only be used in dev
   h2-proxy:
     build:
-      context: .
-      dockerfile: ./Dockerfile.h2-proxy
+      context: ./docker/httpd
+      dockerfile: ./Dockerfile
     volumes:
       - ./docker/httpd/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
     ports:
       - '443:443'
+
+volumes:
+  db-data: {}

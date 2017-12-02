@@ -14,4 +14,4 @@ FROM httpd:2.4-alpine
 
 COPY --from=0 server.key /usr/local/apache2/conf/server.key
 COPY --from=0 server.crt /usr/local/apache2/conf/server.crt
-COPY ./docker/httpd/httpd.conf /usr/local/apache2/conf/httpd.conf
+COPY ./httpd.conf /usr/local/apache2/conf/httpd.conf
